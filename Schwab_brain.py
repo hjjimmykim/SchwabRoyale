@@ -129,6 +129,7 @@ class Agent:
 
         elif target_ind == -3:
             self.has_key = True
+            map[target_loc[0],target_loc[1]] = self.team    # Remove key
 
         elif target_ind == -4 && has_key:
             move_points += glee

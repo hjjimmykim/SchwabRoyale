@@ -10,40 +10,18 @@ def action_queue():
 
 
 # Initialize map, agents, and team scores
-def initialize():
-    agent_dict = {}                            # Dictionary of all agents
-    map = -np.ones([M,M],dtype=np.int)         # M x M map
-  
-  for k in range(1, K+1):    # Loop through teams
-    for n in range(N):       # Loop through agents per team
-      id = N*(k-1) + n                                   # Agent id
-      loc = np.array([int(M/K)*(k-1)+int(M**2/(K*N))*int(n/M), max(int(M/N),1)*(n%M)])        # Starting location
-      '''Divides rows among teams, then fills up rows (if there are fewer agents per team than map width,
-      spaces the agents evenly over one row), and spreads filled up rows over team-zone
-      Previous code: loc = np.array([int(M/K)*(k-1),int(M/N)*n])'''
-  
-      agent_dict[id] = Agent(id, hp_start, loc, k, memory_size, False) # Create agent object and put it in the dictionary
-      map[loc[0],loc[1]] = k                              # Record it on the map by its team number
-      agent_dict[id].memory.wipe()                        # Reset memory
-      
-  return map, agent_dict, team_scores
+def initialize_1p(map, spawn_loc, glee, memory_size):
+    p1 = Agent(1, spawn_loc, glee, memory_size, False)  # Create agent object and put it in the dictionary
+    p1.memory.wipe()                                    # Reset memory
+    map[spawn_loc[0],spawn_loc[1]] = 1                  # Record on the map
+    return p1, map
 
 
 # Reset map and team scores, preserve agents
-def reset(agent_dict):
-  map = -np.ones([M,M],dtype=np.int)         # M x M map
-  team_scores = np.zeros(K, dtype=np.int)
-
-  for k in range(1, K+1):   # Loop through teams
-    for n in range(N):      # Loop through agents per team
-      agnt = agent_dict[N*(k-1) + n] # Take agent
-      
-      loc = np.array([int(M/K)*(k-1)+int(M**2/(K*N))*int(n/M), max(int(M/N),1)*(n%M)])       # Spawn location
-      agnt.loc = loc     # Respawn
-      agnt.hp = hp_start # Revive
-      map[loc[0],loc[1]] = agnt.team    # Record on the map
-            
-  return map, team_scores
+def reset_1p(player, map, spawn_loc):
+    player.loc = spawn_loc              # Respawn
+    map[spawn_loc[0],spawn_loc[1]] = 1  # Record on the map
+    return map
 
 
 # # --Visualization--
