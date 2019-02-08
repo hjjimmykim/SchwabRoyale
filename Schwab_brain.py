@@ -1,6 +1,6 @@
-'''
 import numpy as np
 from collections import deque
+import copy
 
 # # --Machine Learning--
 import torch
@@ -10,12 +10,20 @@ import torch.nn as nn
 import torch.nn.functional as F
 # # -Optimizer
 import torch.optim as optim
-'''
+
+
+
+# # ----Brain Parameters----
+input_dim = 7*11    # Map cells
+output_dim = 4      # Action space
+hidden_dim = 100
+memory_size = 100
+batch_size = 16
 
 
 
 class Net(nn.Module):
-    def __init__(self, input_dim, hidden_dim = 100, output_dim = 4, batch_size = 16):
+    def __init__(self):# , input_dim, hidden_dim = 100, output_dim = 4, batch_size = 16):
         # Fully-connected feedforward network with 2 hidden layers
         # input-dim = 1-D reshaped map
         # hidden_dim = number of units per hidden layer
@@ -33,17 +41,16 @@ class Net(nn.Module):
         self.ff2 = nn.Linear(hidden_dim, hidden_dim)
         self.ff3 = nn.Linear(hidden_dim, output_dim)
 
-    def forward(self, x, batch_size):
+    def forward(self, x, batch_size = 16):
         x = F.relu(self.ff1(x)) # Input -> 1st hidden
         x = F.relu(self.ff2(x)) # 1st hidden -> 2nd hidden
         x = self.ff3(x)         # 2nd hidden -> output
-
         return x
 
 
 
 class Memory:
-    def __init__(self, max_size = 100):
+    def __init__(self, max_size = memory_size):
         self.max = max_size
         self.buffer = deque(maxlen = max_size)
 
@@ -52,7 +59,7 @@ class Memory:
         self.buffer.append(experience)
 
     # Sample batch_size number of entries, without replacement. Return as a list.
-    def sample(self, batch_size):
+    def sample(self):
         buffer_size = len(self.buffer)
 
         index = np.random.choice(np.arange(buffer_size),
@@ -73,27 +80,21 @@ class Memory:
 
 
 class Agent:
-    def __init__(self, id, loc, glee, memory_size, tenure):
+    def __init__(self, id, loc, glee, tenure):
         self.id = id    # Agent id (in agent_dict)
         self.loc = loc  # Location (r,c coordinate [r,c])
-        self.memory_size = memory_size # Experience replay maximum capacity
+#        self.memory_size = memory_size # Experience replay maximum capacity
         self.tenure = tenure       # If you don't have tenure yet, you gotta learn (i.e. determines whether the agent is learning)
 
         self.has_key = False
 	
-        self.reward = 0   # Keep track of reward
-        self.glee = glee	# Number of points gained from opening A door
+        self.reward = 0     # Keep track of reward
+        self.glee = glee    # Number of points gained from opening A door
+        self.victorious = False # Track task completion
 
         # Create brain
-        input_dim = M*M # Map cells
-        output_dim = action_size
-
-        self.DQN = Net(input_dim, hidden_dim, output_dim, batch_size) # Personal neural network
-        self.DQN_target = Net(input_dim, hidden_dim, output_dim, batch_size)         # Target network
-
-        if torch.cuda.is_available() and use_cuda:
-            self.DQN = self.DQN.cuda()
-            self.DQN_target = self.DQN_target.cuda()
+        self.DQN = Net() # Personal neural network
+        self.DQN_target = Net()         # Target network
 
         self.optimizer = optim.Adam(self.DQN.parameters())
 
@@ -106,10 +107,9 @@ class Agent:
         state[self.loc[0]][self.loc[1]] = 0            # Own location = 0 on map
         state = np.reshape(state, [1,-1]).squeeze()    # Convert to 1D array
         return state
-
-
+'''
     # Taking an action based on chosen direction
-    def act(self, dir, turn):
+    def act(self, dir, turn, quiet):
         # dir should be an np.array
         # turn = just for displaying kill message
         # quiet = print kill message or not
@@ -117,12 +117,13 @@ class Agent:
         # Rewards resulting from this move
         move_points = 0
 
-        target_loc = self.loc + dir # Candidate target location
-                                                                                                                                                                                                                                  
-	# Check if target location is within bounds (make sure the agent cannot move into itself)
+        # Candidate target location
+        target_loc = self.loc + dir
+
+        # Check if target location is within bounds (make sure the agent cannot move into itself)
         target_ind = map[target_loc[0]][target_loc[1]]    # Object at target location
 
-        if target_ind == -1:                              # If target location is empty
+        if target_ind == -1:                                # If target location is empty
             map[self.loc[0],self.loc[1]] = -1               # Previous location becomes empty
             map[target_loc[0],target_loc[1]] = self.team    # Target location becomes occupied
             self.loc = target_loc                           # Update location
@@ -130,12 +131,14 @@ class Agent:
         elif target_ind == -3:
             self.has_key = True
             map[target_loc[0],target_loc[1]] = self.team    # Remove key
+            if not quiet:
+                print("Picked up the key on turn", turn)
 
-        elif target_ind == -4 && has_key:
+        elif target_ind == -4 and has_key:
             move_points += glee
-                               
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+                                                                                                                                                                                                                                                                                                                                                                                                                                                           
         # Update the cumulative rewards
         self.reward += move_points
         # Return immediate rewards
         return move_points
+'''

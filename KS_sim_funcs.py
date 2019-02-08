@@ -1,3 +1,8 @@
+from Schwab_brain import Agent
+import numpy as np
+
+
+
 # Translates action space to a direction
 def get_dir(action):	# NESW
     dir_list = [np.array([-1,0]),np.array([0,1]),np.array([1,0]),np.array([0,-1])]
@@ -10,8 +15,8 @@ def action_queue():
 
 
 # Initialize map, agents, and team scores
-def initialize_1p(map, spawn_loc, glee, memory_size):
-    p1 = Agent(1, spawn_loc, glee, memory_size, False)  # Create agent object and put it in the dictionary
+def initialize_1p(map, spawn_loc, glee):
+    p1 = Agent(1, spawn_loc, glee, False)  # Create agent object and put it in the dictionary
     p1.memory.wipe()                                    # Reset memory
     map[spawn_loc[0],spawn_loc[1]] = 1                  # Record on the map
     return p1, map
