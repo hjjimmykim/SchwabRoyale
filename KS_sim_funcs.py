@@ -28,33 +28,7 @@ def initialize_1p(map_in, spawn_loc, glee):
 def reset_1p(player, map_in, spawn_loc):
     player.loc = spawn_loc              # Respawn
     player.has_key = False
+    player.reward = 0
     map = copy.deepcopy(map_in)
     map[spawn_loc[0],spawn_loc[1]] = 1  # Record on the map
     return map
-
-
-# # --Visualization--
-def plot_map(map):
-  # Set background
-    map_plot = copy.deepcopy(map)
-    map_plot[map_plot == -1] = 8 # Color the background
-  
-  # Show map
-    plt.imshow(map_plot, cmap='Set1',interpolation='none',aspect='equal')
-
-  # Current axis
-    ax = plt.gca()
-
-  # Set up grid
-    ax.set_xticks(np.arange(-0.5,M,1));
-    ax.set_yticks(np.arange(-0.5,M,1));
-
-    ax.set_xticklabels([]);
-    ax.set_yticklabels([]);
-
-  # Show grid
-    plt.grid(color='w')
-  
-  # Display
-    display.display(plt.gcf())
-    display.clear_output(wait=True)

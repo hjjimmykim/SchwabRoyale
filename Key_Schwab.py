@@ -7,6 +7,7 @@ import copy
 
 # # --Graphics--
 import matplotlib.pyplot as plt
+from matplotlib import animation
 # from IPython import display # For animation
 
 # # --Machine Learning--
@@ -27,7 +28,7 @@ import KS_sim_funcs as Sim
 # # -Simulation Parameters
 max_turn = 2000 # Max number of turns per episode
 record_turn = int(max_turn/100)  # Record turn every record_turn turns
-n_ep = 100        # Number of training episodes
+n_ep = 1        # Number of training episodes
 
 # # -Agent Parameters, Schwab_brain.py has values for input_, output_, and hidden_dimensions, and batch_ and memory_size
 target_copy_freq = 10   # Update target network every tcf turns
@@ -64,6 +65,7 @@ map_2p = np.array([
 # # --1 Player Simulation--
 p1, map = Sim.initialize_1p(map_1p, np.array([3,1]), glee)
 runtime_list = []
+map_list = [map_1p]
 
 for i_ep in range(n_ep):	# Loop through games
     # stats
@@ -91,7 +93,7 @@ for i_ep in range(n_ep):	# Loop through games
         action = torch.from_numpy(np.array(action))
         dir = Sim.get_dir(action)	# Convert to direction
 
-    # # Take the action
+        # # Take the action
         # Rewards resulting from this move
         turn_reward = 0
 
@@ -168,6 +170,8 @@ for i_ep in range(n_ep):	# Loop through games
         # Game ended without conclusion
         if turn == max_turn-1:
             print("Trial did not finish.")
+
+        np.append(map_list, [map], axis = 0)
   
     runtime = time.time()-t_start
     runtime_list.append(runtime)
@@ -175,14 +179,56 @@ for i_ep in range(n_ep):	# Loop through games
     #print("Game", str(i_ep), "ended on turn", turn, "-----------------------")
 
 
+
+'''
 # # ----Save Runtime Data
 savePath = 'Save/'
 fileName = datetime.datetime.today().strftime('%Y-%m-%d_%H:%M') + '.pkl'
 with open(savePath + fileName, 'wb') as f:
     pickle.dump(runtime_list, f)
+'''
 
 
+# # ----Visualization----
+'''
+fig, ax_lst = plt.subplots(7,11)
+ax_lst = ax_lst.ravel()
+'''
+'''
+ax = plt.gca()
+ax.set_xticks(np.arange(-0.5,11,1));
+ax.set_yticks(np.arange(-0.5,7,1));
+ax.set_xticklabels([]);
+ax.set_yticklabels([]);
+plt.grid(color='w')
+'''
+fig = plt.figure()
+
+pre_frame = copy.deepcopy(map_1p)
+pre_frame[pre_frame == -1] = 8	# Color the background
+frame = plt.imshow(pre_frame, cmap='Set1', interpolation='none', aspect='equal', animated=True)
+
+def animate(i):
+    pre_frame = copy.deepcopy(map_list[i])
+    pre_frame[pre_frame == -1] = 8	# Color the background
+    frame = plt.imshow(pre_frame, cmap='Set1', interpolation='none', aspect='equal', animated=True)
+    return frame
+
+# Call the animator.  blit=True means only re-draw the parts that have changed.
+anim = animation.FuncAnimation(fig, animate, frames=turn, interval=200, blit=True)
+
+'''
 # # ----Runtime Plot----
 trl = np.arange(n_ep)
 plt.plot(trl, runtime_list)
+plt.show()
+'''
+'''
+# save the animation as an mp4.  This requires ffmpeg or mencoder to be
+# installed.  The extra_args ensure that the x264 codec is used, so that
+# the video can be embedded in html5.  You may need to adjust this for
+# your system: for more information, see
+# http://matplotlib.sourceforge.net/api/animation_api.html
+# anim.save('basic_animation.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
+'''
 plt.show()
