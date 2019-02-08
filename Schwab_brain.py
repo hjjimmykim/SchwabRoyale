@@ -90,7 +90,6 @@ class Agent:
 	
         self.reward = 0     # Keep track of reward
         self.glee = glee    # Number of points gained from opening A door
-        self.victorious = False # Track task completion
 
         # Create brain
         self.DQN = Net() # Personal neural network

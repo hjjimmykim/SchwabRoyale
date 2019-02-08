@@ -2,6 +2,7 @@ import numpy as np
 import pickle
 from collections import deque
 import time
+import datetime
 import copy
 
 # # --Graphics--
@@ -24,9 +25,9 @@ import KS_sim_funcs as Sim
 
 
 # # -Simulation Parameters
-max_turn = 10000 # Max number of turns per episode
+max_turn = 1000 # Max number of turns per episode
 record_turn = int(max_turn/100)  # Record turn every record_turn turns
-n_ep = 10       # Number of training episodes
+n_ep = 3        # Number of training episodes
 
 # # -Agent Parameters, Schwab_brain.py has values for input_, output_, and hidden_dimensions, and batch_ and memory_size
 target_copy_freq = 10   # Update target network every tcf turns
@@ -62,11 +63,14 @@ map_2p = np.array([
 
 # # --1 Player Simulation--
 p1, map = Sim.initialize_1p(map_1p, np.array([3,1]), glee)
+runtime_list = []
 
 for i_ep in range(n_ep):	# Loop through games
     # stats
     # Reset map and team scores
-    map = Sim.reset_1p(p1, map, np.array([3,1]))
+    print("Before reset:", map[6][3])
+    map = Sim.reset_1p(p1, map_1p, np.array([3,1]))
+    print("After reset:", map[6][3])
 
     print('Trial', i_ep, 'started.')
     # For keeping track of time
@@ -99,20 +103,19 @@ for i_ep in range(n_ep):	# Loop through games
         # Determine result
         target_ind = map[target_loc[0]][target_loc[1]]    # Object at target location
 
-        if target_ind == -1:                                # If target location is empty
-            map[p1.loc[0],p1.loc[1]] = -1               # Previous location becomes empty
+        if target_ind == -1:				# If target location is empty
+            map[p1.loc[0],p1.loc[1]] = -1		# Previous location becomes empty
             map[target_loc[0],target_loc[1]] = p1.id    # Target location becomes occupied
-            p1.loc = target_loc                           # Update location
+            p1.loc = target_loc				# Update location
 
         elif target_ind == -3:
             p1.has_key = True
-            map[target_loc[0],target_loc[1]] = p1.id    # Remove key
+            map[target_loc[0],target_loc[1]] = -2    # Remove key
             print("Picked up the key on turn", turn)
 
         elif target_ind == -4 and p1.has_key:
             turn_reward += glee
-            print("Task completed!")
-            print("Trial", i_ep, "ended on turn", turn)#, "-----------------------")
+            # print("Task completed!")
             break
                                                                                                                                                                                                                                                                                                                                                                                                                                                            
         # Update the cumulative rewards
@@ -157,17 +160,31 @@ for i_ep in range(n_ep):	# Loop through games
             p1.optimizer.zero_grad()
             loss.backward()
             p1.optimizer.step()
-
+        '''
         # Time-keeping
         if (turn+1) % record_turn == 0:
             t2 = time.time()
             print("Runtime for turns ", turn-record_turn+1, '-', turn, ': ', t2-t1)
             t1 = t2
-
+        '''
         # Game ended without conclusion
         if turn == max_turn-1:
             print("Trial did not finish.")
   
-    t_finish = time.time()
-    print("Trial", i_ep, "runtime:", t_finish-t_start, "-----------------------")
+    runtime = time.time()-t_start
+    runtime_list.append(runtime)
+    print("Trial", i_ep, "ended on turn", turn, "Runtime:", runtime, "-----------------------")
     #print("Game", str(i_ep), "ended on turn", turn, "-----------------------")
+
+
+# # ----Save Runtime Data
+savePath = 'Save/'
+fileName = datetime.datetime.today().strftime('%Y-%m-%d_%H:%M') + '.pkl'
+with open(savePath + fileName, 'wb') as f:
+    pickle.dump(runtime_list, f)
+
+
+# # ----Runtime Plot----
+trl = np.arange(n_ep)
+plt.plot(trl, runtime_list)
+plt.show()
