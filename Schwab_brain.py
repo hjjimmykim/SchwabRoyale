@@ -106,38 +106,3 @@ class Agent:
         state[self.loc[0]][self.loc[1]] = 0            # Own location = 0 on map
         state = np.reshape(state, [1,-1]).squeeze()    # Convert to 1D array
         return state
-'''
-    # Taking an action based on chosen direction
-    def act(self, dir, turn, quiet):
-        # dir should be an np.array
-        # turn = just for displaying kill message
-        # quiet = print kill message or not
-
-        # Rewards resulting from this move
-        move_points = 0
-
-        # Candidate target location
-        target_loc = self.loc + dir
-
-        # Check if target location is within bounds (make sure the agent cannot move into itself)
-        target_ind = map[target_loc[0]][target_loc[1]]    # Object at target location
-
-        if target_ind == -1:                                # If target location is empty
-            map[self.loc[0],self.loc[1]] = -1               # Previous location becomes empty
-            map[target_loc[0],target_loc[1]] = self.team    # Target location becomes occupied
-            self.loc = target_loc                           # Update location
-
-        elif target_ind == -3:
-            self.has_key = True
-            map[target_loc[0],target_loc[1]] = self.team    # Remove key
-            if not quiet:
-                print("Picked up the key on turn", turn)
-
-        elif target_ind == -4 and has_key:
-            move_points += glee
-                                                                                                                                                                                                                                                                                                                                                                                                                                                           
-        # Update the cumulative rewards
-        self.reward += move_points
-        # Return immediate rewards
-        return move_points
-'''

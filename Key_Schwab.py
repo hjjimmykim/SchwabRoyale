@@ -25,9 +25,9 @@ import KS_sim_funcs as Sim
 
 
 # # -Simulation Parameters
-max_turn = 1000 # Max number of turns per episode
+max_turn = 2000 # Max number of turns per episode
 record_turn = int(max_turn/100)  # Record turn every record_turn turns
-n_ep = 3        # Number of training episodes
+n_ep = 100        # Number of training episodes
 
 # # -Agent Parameters, Schwab_brain.py has values for input_, output_, and hidden_dimensions, and batch_ and memory_size
 target_copy_freq = 10   # Update target network every tcf turns
@@ -68,9 +68,7 @@ runtime_list = []
 for i_ep in range(n_ep):	# Loop through games
     # stats
     # Reset map and team scores
-    print("Before reset:", map[6][3])
     map = Sim.reset_1p(p1, map_1p, np.array([3,1]))
-    print("After reset:", map[6][3])
 
     print('Trial', i_ep, 'started.')
     # For keeping track of time
