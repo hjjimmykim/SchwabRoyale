@@ -14,7 +14,7 @@ import torch.optim as optim
 
 
 # # ----Brain Parameters----
-input_dim = 7*11    # Map cells
+input_dim = 5*5#7*11    # Map cells
 output_dim = 4      # Action space
 hidden_dim = 100
 memory_size = 100

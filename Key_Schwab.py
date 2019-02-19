@@ -28,7 +28,7 @@ import KS_sim_funcs as Sim
 # # -Simulation Parameters
 max_turn = 2000 # Max number of turns per episode
 record_turn = int(max_turn/100)  # Record turn every record_turn turns
-n_ep = 1        # Number of training episodes
+n_ep = 1000        # Number of training episodes
 
 # # -Agent Parameters, Schwab_brain.py has values for input_, output_, and hidden_dimensions, and batch_ and memory_size
 target_copy_freq = 10   # Update target network every tcf turns
@@ -37,11 +37,19 @@ alpha = 0.01    # Learning rate
 beta = 0.1      # Exploration Parameter
 gamma = 0.9     # Discount Factor
 
-glee = 1	# Reward per opened door
+glee = 10	# Reward per opened door
 
 
 
 # # --Maps--
+# Remember to modify input_dim in Schwab_brain (sorry 4 hardcoding, but am lazy potato)
+map_1p = np.array([
+    [-2,-4,-2,-2,-2],
+    [-2,-1,-1,-1,-2],
+    [-2,-1,-1,-1,-2],
+    [-3,-1,-1,-1,-2],
+    [-2,-2,-2,-2,-2]])
+'''
 map_1p = np.array([
     [-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2],
     [-2,-1,-1,-1,-1,-2,-1,-1,-1,-1,-2],
@@ -50,7 +58,7 @@ map_1p = np.array([
     [-2,-1,-1,-1,-1,-2,-1,-1,-1,-1,-4],
     [-2,-1,-1,-1,-1,-2,-1,-1,-1,-1,-2],
     [-2,-2,-2,-3,-2,-2,-2,-2,-2,-2,-2]])
-'''
+
 map_2p = np.array([
     [-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2],
     [-2,-1,-1,-1,-1,-2,-1,-1,-1,-1,-2],
@@ -63,16 +71,16 @@ map_2p = np.array([
 
 
 # # --1 Player Simulation--
-p1, map = Sim.initialize_1p(map_1p, np.array([3,1]), glee)
-runtime_list = []
+p1, map = Sim.initialize_1p(map_1p, np.array([3,3]), glee)
+turn_list = []
 map_list = [map_1p]
 
 for i_ep in range(n_ep):	# Loop through games
     # stats
     # Reset map and team scores
-    map = Sim.reset_1p(p1, map_1p, np.array([3,1]))
+    map = Sim.reset_1p(p1, map_1p, np.array([3,3]))
 
-    print('Trial', i_ep, 'started.')
+    # print('Trial', i_ep, 'started.')
     # For keeping track of time
     t_start = time.time()
     t1 = time.time()
@@ -111,7 +119,7 @@ for i_ep in range(n_ep):	# Loop through games
         elif target_ind == -3:
             p1.has_key = True
             map[target_loc[0],target_loc[1]] = -2    # Remove key
-            print("Picked up the key on turn", turn)
+            #print("Picked up the key on turn", turn)
 
         elif target_ind == -4 and p1.has_key:
             turn_reward += glee
@@ -174,19 +182,19 @@ for i_ep in range(n_ep):	# Loop through games
         np.append(map_list, [map], axis = 0)
   
     runtime = time.time()-t_start
-    runtime_list.append(runtime)
+    turn_list.append(turn)
     print("Trial", i_ep, "ended on turn", turn, "Runtime:", runtime, "-----------------------")
     #print("Game", str(i_ep), "ended on turn", turn, "-----------------------")
 
 
 
-'''
+
 # # ----Save Runtime Data
 savePath = 'Save/'
 fileName = datetime.datetime.today().strftime('%Y-%m-%d_%H:%M') + '.pkl'
 with open(savePath + fileName, 'wb') as f:
-    pickle.dump(runtime_list, f)
-'''
+    pickle.dump(turn_list, f)
+
 
 
 # # ----Visualization----
@@ -201,6 +209,7 @@ ax.set_yticks(np.arange(-0.5,7,1));
 ax.set_xticklabels([]);
 ax.set_yticklabels([]);
 plt.grid(color='w')
+'''
 '''
 fig = plt.figure()
 
@@ -220,9 +229,9 @@ anim = animation.FuncAnimation(fig, animate, frames=turn, interval=200, blit=Tru
 '''
 # # ----Runtime Plot----
 trl = np.arange(n_ep)
-plt.plot(trl, runtime_list)
+plt.plot(trl, turn_list)
 plt.show()
-'''
+
 '''
 # save the animation as an mp4.  This requires ffmpeg or mencoder to be
 # installed.  The extra_args ensure that the x264 codec is used, so that
@@ -231,4 +240,4 @@ plt.show()
 # http://matplotlib.sourceforge.net/api/animation_api.html
 # anim.save('basic_animation.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
 '''
-plt.show()
+# plt.show()
