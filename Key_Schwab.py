@@ -7,8 +7,7 @@ import copy
 
 # # --Graphics--
 import matplotlib.pyplot as plt
-from matplotlib import animation
-# from IPython import display # For animation
+import matplotlib.animation as manimation
 
 # # --Machine Learning--
 import torch
@@ -28,7 +27,7 @@ import KS_sim_funcs as Sim
 # # -Simulation Parameters
 max_turn = 2000 # Max number of turns per episode
 record_turn = int(max_turn/100)  # Record turn every record_turn turns
-n_ep = 1000        # Number of training episodes
+n_ep = 1        # Number of training episodes
 
 # # -Agent Parameters, Schwab_brain.py has values for input_, output_, and hidden_dimensions, and batch_ and memory_size
 target_copy_freq = 10   # Update target network every tcf turns
@@ -37,7 +36,7 @@ alpha = 0.01    # Learning rate
 beta = 0.1      # Exploration Parameter
 gamma = 0.9     # Discount Factor
 
-glee = 10	# Reward per opened door
+glee = 1	# Reward per opened door
 
 
 
@@ -191,7 +190,8 @@ for i_ep in range(n_ep):	# Loop through games
 
 # # ----Save Runtime Data
 savePath = 'Save/'
-fileName = datetime.datetime.today().strftime('%Y-%m-%d_%H:%M') + '.pkl'
+save_time = datetime.datetime.today().strftime('%Y-%m-%d_%H:%M')
+fileName = save_time + '.pkl'
 with open(savePath + fileName, 'wb') as f:
     pickle.dump(turn_list, f)
 
@@ -226,18 +226,28 @@ def animate(i):
 # Call the animator.  blit=True means only re-draw the parts that have changed.
 anim = animation.FuncAnimation(fig, animate, frames=turn, interval=200, blit=True)
 
+# anim.save('basic_animation.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
 '''
+
+ffmpegWriter = manimation.writers['ffmpeg']
+metadata = dict(title = save_time, artist = 'J-C', comment = "Animation Test")
+writer = ffmpegWriter(fps = 15, metadata = metadata)
+
+N = len(map_list) # Number of frames
+
+fig = plt.figure()
+
+vid_name = save_time + '.mp4'
+print("Filetype:", type(vid_name) )
+print("Vid Name:", vid_name, "Num turns:", N)
+with writer.saving(fig, vid_name, N):
+    for i in range(N):
+        plt.clf()
+        frame = map_list[i]
+        plt.imshow(frame)
+        writer.grab_frame()
+
 # # ----Runtime Plot----
 trl = np.arange(n_ep)
 plt.plot(trl, turn_list)
 plt.show()
-
-'''
-# save the animation as an mp4.  This requires ffmpeg or mencoder to be
-# installed.  The extra_args ensure that the x264 codec is used, so that
-# the video can be embedded in html5.  You may need to adjust this for
-# your system: for more information, see
-# http://matplotlib.sourceforge.net/api/animation_api.html
-# anim.save('basic_animation.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
-'''
-# plt.show()
