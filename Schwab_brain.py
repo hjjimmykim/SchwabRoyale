@@ -16,9 +16,9 @@ import torch.optim as optim
 # # ----Brain Parameters----
 input_dim = 5*5#7*11    # Map cells
 output_dim = 4      # Action space
-hidden_dim = 100
-memory_size = 100
-batch_size = 16
+hidden_dim = 10
+memory_size = 1000
+batch_size = 100
 
 
 
@@ -38,12 +38,12 @@ class Net(nn.Module):
 
         # Layers
         self.ff1 = nn.Linear(input_dim, hidden_dim)
-        self.ff2 = nn.Linear(hidden_dim, hidden_dim)
+#        self.ff2 = nn.Linear(hidden_dim, hidden_dim)
         self.ff3 = nn.Linear(hidden_dim, output_dim)
 
-    def forward(self, x, batch_size = 16):
+    def forward(self, x):
         x = F.relu(self.ff1(x)) # Input -> 1st hidden
-        x = F.relu(self.ff2(x)) # 1st hidden -> 2nd hidden
+#        x = F.relu(self.ff2(x)) # 1st hidden -> 2nd hidden
         x = self.ff3(x)         # 2nd hidden -> output
         return x
 
@@ -95,7 +95,7 @@ class Agent:
         self.DQN = Net() # Personal neural network
         self.DQN_target = Net()         # Target network
 
-        self.optimizer = optim.Adam(self.DQN.parameters())
+        self.optimizer = optim.RMSprop(self.DQN.parameters())
 
         self.memory = Memory(memory_size) # Experience replay
 

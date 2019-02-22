@@ -25,9 +25,9 @@ import KS_sim_funcs as Sim
 
 
 # # -Simulation Parameters
-max_turn = 2000 # Max number of turns per episode
+max_turn = 1000 # Max number of turns per episode
 record_turn = int(max_turn/100)  # Record turn every record_turn turns
-n_ep = 1        # Number of training episodes
+n_ep = 1000        # Number of training episodes
 
 # # -Agent Parameters, Schwab_brain.py has values for input_, output_, and hidden_dimensions, and batch_ and memory_size
 target_copy_freq = 10   # Update target network every tcf turns
@@ -73,6 +73,8 @@ map_2p = np.array([
 p1, map = Sim.initialize_1p(map_1p, np.array([3,3]), glee)
 turn_list = []
 # map_list = [map_1p]
+print("Before Sim:", p1.DQN.state_dict()['ff3.weight'])
+t0 = time.time()
 
 for i_ep in range(n_ep):	# Loop through games
     # stats
@@ -178,14 +180,14 @@ for i_ep in range(n_ep):	# Loop through games
         if turn == max_turn-1:
             print("Trial did not finish.")
 
-        np.append(map_list, [map], axis = 0)
+#        np.append(map_list, [map], axis = 0)
   
     runtime = time.time()-t_start
     turn_list.append(turn)
-    print("Trial", i_ep, "ended on turn", turn, "Runtime:", runtime, "-----------------------")
+    #print("Trial", i_ep, "ended on turn", turn, "Runtime:", runtime, "-----------------------")
     #print("Game", str(i_ep), "ended on turn", turn, "-----------------------")
 
-
+print("After sim:", p1.DQN.state_dict()['ff3.weight'], "Sim time:", time.time()-t0)
 
 
 # # ----Save Runtime Data
