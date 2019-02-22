@@ -72,7 +72,7 @@ map_2p = np.array([
 # # --1 Player Simulation--
 p1, map = Sim.initialize_1p(map_1p, np.array([3,3]), glee)
 turn_list = []
-map_list = [map_1p]
+# map_list = [map_1p]
 
 for i_ep in range(n_ep):	# Loop through games
     # stats
@@ -196,56 +196,6 @@ with open(savePath + fileName, 'wb') as f:
     pickle.dump(turn_list, f)
 
 
-
-# # ----Visualization----
-'''
-fig, ax_lst = plt.subplots(7,11)
-ax_lst = ax_lst.ravel()
-'''
-'''
-ax = plt.gca()
-ax.set_xticks(np.arange(-0.5,11,1));
-ax.set_yticks(np.arange(-0.5,7,1));
-ax.set_xticklabels([]);
-ax.set_yticklabels([]);
-plt.grid(color='w')
-'''
-'''
-fig = plt.figure()
-
-pre_frame = copy.deepcopy(map_1p)
-pre_frame[pre_frame == -1] = 8	# Color the background
-frame = plt.imshow(pre_frame, cmap='Set1', interpolation='none', aspect='equal', animated=True)
-
-def animate(i):
-    pre_frame = copy.deepcopy(map_list[i])
-    pre_frame[pre_frame == -1] = 8	# Color the background
-    frame = plt.imshow(pre_frame, cmap='Set1', interpolation='none', aspect='equal', animated=True)
-    return frame
-
-# Call the animator.  blit=True means only re-draw the parts that have changed.
-anim = animation.FuncAnimation(fig, animate, frames=turn, interval=200, blit=True)
-
-# anim.save('basic_animation.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
-'''
-
-ffmpegWriter = manimation.writers['ffmpeg']
-metadata = dict(title = save_time, artist = 'J-C', comment = "Animation Test")
-writer = ffmpegWriter(fps = 15, metadata = metadata)
-
-N = len(map_list) # Number of frames
-
-fig = plt.figure()
-
-vid_name = save_time + '.mp4'
-print("Filetype:", type(vid_name) )
-print("Vid Name:", vid_name, "Num turns:", N)
-with writer.saving(fig, vid_name, N):
-    for i in range(N):
-        plt.clf()
-        frame = map_list[i]
-        plt.imshow(frame)
-        writer.grab_frame()
 
 # # ----Runtime Plot----
 trl = np.arange(n_ep)
