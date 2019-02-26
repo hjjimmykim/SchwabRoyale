@@ -14,27 +14,22 @@ import torch.optim as optim
 
 
 # # ----Brain Parameters----
-input_dim = 5*5#7*11    # Map cells
-output_dim = 4      # Action space
-hidden_dim = 10
+'''
+input_dim = 5*5#7*11    # 1-D reshaped map
+output_dim = 4          # Number of outputs (i.e. Action Space)
+hidden_dim = 10         # number of units per hidden layer
 memory_size = 1000
 batch_size = 100
-
+'''
 
 
 class Net(nn.Module):
-    def __init__(self):# , input_dim, hidden_dim = 100, output_dim = 4, batch_size = 16):
-        # Fully-connected feedforward network with 2 hidden layers
-        # input-dim = 1-D reshaped map
-        # hidden_dim = number of units per hidden layer
-        # output_dim = number of outputs (i.e. actions)
-        # Initialize superclass
-        super().__init__() # Apparently we can use this newer notation. Old notation was: super(Net, self).__init__()
+    def __init__(self, input_dim, hidden_dim, output_dim):
+        super().__init__() # Initialize superclass
 
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim
         self.output_dim = output_dim
-        self.batch_size = batch_size
 
         # Layers
         self.ff1 = nn.Linear(input_dim, hidden_dim)
@@ -50,9 +45,10 @@ class Net(nn.Module):
 
 
 class Memory:
-    def __init__(self, max_size = memory_size):
-        self.max = max_size
-        self.buffer = deque(maxlen = max_size)
+    def __init__(self, memory_size, batch_size):
+        self.max = memory_size
+        self.buffer = deque(maxlen = memory_size)
+        self.batch_size = batch_size
 
     # Add entry. FIFO.
     def add(self, experience):
@@ -63,7 +59,7 @@ class Memory:
         buffer_size = len(self.buffer)
 
         index = np.random.choice(np.arange(buffer_size),
-                size = min(batch_size,buffer_size),
+                size = min(self.batch_size, buffer_size),
                 replace = False)
         return [self.buffer[i] for i in index]
 
@@ -80,10 +76,9 @@ class Memory:
 
 
 class Agent:
-    def __init__(self, id, loc, glee, tenure):
+    def __init__(self, id, loc, in_dim, hid_dim = 10, out_dim = 4, mem_size = 1000, batch_size = 100, glee = 1, tenure = False):
         self.id = id    # Agent id (in agent_dict)
         self.loc = loc  # Location (r,c coordinate [r,c])
-#        self.memory_size = memory_size # Experience replay maximum capacity
         self.tenure = tenure       # If you don't have tenure yet, you gotta learn (i.e. determines whether the agent is learning)
 
         self.has_key = False
@@ -92,12 +87,12 @@ class Agent:
         self.glee = glee    # Number of points gained from opening A door
 
         # Create brain
-        self.DQN = Net() # Personal neural network
-        self.DQN_target = Net()         # Target network
+        self.DQN = Net(in_dim, hid_dim, out_dim)        # Personal neural network
+        self.DQN_target = Net(in_dim, hid_dim, out_dim) # Target network
 
-        self.optimizer = optim.RMSprop(self.DQN.parameters())
+        self.optimizer = optim.SGD(self.DQN.parameters(), lr=0.01)
 
-        self.memory = Memory(memory_size) # Experience replay
+        self.memory = Memory(mem_size, batch_size) # Experience replay
 
 
     # State formation
