@@ -16,9 +16,9 @@ def action_queue():
 
 
 # Initialize map, agents, and team scores
-def initialize_1p(map_in, spawn_loc, glee):
-    p1 = Agent(1, spawn_loc, glee, False)  # Create agent object and put it in the dictionary
-    p1.memory.wipe()                                    # Reset memory
+def initialize_1p(map_in, spawn_loc, input_dim):
+    p1 = Agent(1, spawn_loc, input_dim)  # Create agent object and put it in the dictionary
+#    p1.memory.wipe()                                    # Reset memory
     map = copy.deepcopy(map_in)
     map[spawn_loc[0],spawn_loc[1]] = 1                  # Record on the map
     return p1, map
