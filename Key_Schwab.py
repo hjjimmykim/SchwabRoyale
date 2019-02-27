@@ -40,7 +40,6 @@ sc = 0.7        # Baseline smoothing constant
 
 
 # # --Maps--
-# Remember to modify input_dim in Schwab_brain (sorry 4 hardcoding, but am lazy potato)
 map_1p = np.array([
     [-2,-4,-2,-2,-2],
     [-2,-1,-1,-1,-2],
@@ -71,17 +70,16 @@ map_2p = np.array([
 # # --1 Player Simulation--
 p1, map = Sim.initialize_1p(map_1p, np.array([3,3]), 5*5)
 turn_list = []
+turn_list_smoothed = []
 # map_list = [map_1p]
 
 for i_ep in range(n_ep):	# Loop through games
     # stats
-    # Reset map and action/probability lists
     map = Sim.reset_1p(p1, map_1p, np.array([3,3]))
     prob_list = []
     act_list = []
 
-    # print('Trial', i_ep, 'started.')
-    # For keeping track of time
+    # Timekeeping
     t_start = time.time()
     t1 = time.time()
 
@@ -99,12 +97,8 @@ for i_ep in range(n_ep):	# Loop through games
         # Log action taken and it's probability
         prob_list.append(probs[action])
 
-
       # # Take the action
-        # Candidate target location
         target_loc = p1.loc + dir
-
-        # Determine result
         target_ind = map[target_loc[0]][target_loc[1]]    # Object at target location
 
         if target_ind == -1:				# If target location is empty
@@ -122,18 +116,9 @@ for i_ep in range(n_ep):	# Loop through games
             # print("Task completed!")
             break
 
-        # Update the cumulative rewards
         p1.reward += turn_reward
-        # Immediate reward
         turn_reward = torch.from_numpy(np.array(turn_reward))
 
-        '''
-        # Time-keeping
-        if (turn+1) % record_turn == 0:
-            t2 = time.time()
-            print("Runtime for turns ", turn-record_turn+1, '-', turn, ': ', t2-t1)
-            t1 = t2
-        '''
         # Game ended without conclusion
         if turn == max_turn-1:
             print("Trial did not finish.")
@@ -147,16 +132,15 @@ for i_ep in range(n_ep):	# Loop through games
         #print("Trial", i_ep, "ended on turn", turn)
         print("Trials", i_ep-100, '-', i_ep-1, "average steps taken:", sum(turn_list[-100:])/100 )
 
-    if not p1.tenure:
-        loss = 0
-        for t in range(turn):
-            turn_update = p1.REINFORCE(prob_list[t], p1.reward, p1.baseline)
-            loss += turn_update
-        p1.optimizer.zero_grad()
-        loss.backward()
-        p1.optimizer.step()
-        # Baseline update
-        p1.baseline = sc * p1.baseline + (1-sc) * p1.reward 
+    # # Policy update
+    loss = 0
+    for t in range(turn):
+        turn_update = p1.REINFORCE(prob_list[t], p1.reward, p1.baseline)
+        loss += turn_update
+    p1.optimizer.zero_grad()
+    loss.backward()
+    p1.optimizer.step()
+    p1.baseline = sc * p1.baseline + (1-sc) * p1.reward 
 
 
 

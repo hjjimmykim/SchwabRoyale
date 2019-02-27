@@ -32,3 +32,8 @@ def reset_1p(player, map_in, spawn_loc):
     map = copy.deepcopy(map_in)
     map[spawn_loc[0],spawn_loc[1]] = 1  # Record on the map
     return map
+
+# Policy update function
+def REINFORCE(self, probability, reward, baseline):
+    rl = -torch.log(probability) * (reward-baseline)
+    return rl
