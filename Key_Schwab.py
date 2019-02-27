@@ -27,7 +27,7 @@ import KS_sim_funcs as Sim
 # # -Simulation Parameters
 max_turn = 2000 # Max number of turns per episode
 #record_turn = int(max_turn/100)  # Record turn every record_turn turns
-n_ep = 100        # Number of training episodes
+n_ep = 10000        # Number of training episodes
 
 # # -Agent Parameters
 alpha = 0.01    # Learning rate
@@ -142,7 +142,11 @@ for i_ep in range(n_ep):	# Loop through games
   
     runtime = time.time()-t_start
     turn_list.append(turn)
-    print("Trial", i_ep, "ended on turn", turn, "Runtime:", runtime, "-----------------------")
+#    print("Trial", i_ep, "ended on turn", turn, "Runtime:", runtime, "-----------------------")
+    if i_ep % 100 == 0 and i_ep!=0:
+        #print("Trial", i_ep, "ended on turn", turn)
+        print("Trials", i_ep-100, '-', i_ep-1, "average steps taken:", sum(turn_list[-100:])/100 )
+
     if not p1.tenure:
         loss = 0
         for t in range(turn):

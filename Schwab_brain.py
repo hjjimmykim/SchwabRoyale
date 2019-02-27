@@ -29,7 +29,7 @@ class Net(nn.Module):
     def forward(self, x):
         x = F.relu(self.ff1(x)) # Input -> 1st hidden
 #        x = F.relu(self.ff2(x)) # 1st hidden -> 2nd hidden
-        x = F.softmax(self.ff3(x))         # 2nd hidden -> output
+        x = F.softmax(self.ff3(x), dim=0)         # 2nd hidden -> output, deprecation along dim=0 (there should only be one)
         return x
 
 
@@ -48,7 +48,7 @@ class Agent:
 
         # Create brain
         self.PolNet = Net(in_dim, hid_dim, out_dim)        # Personal neural network
-        self.optimizer = optim.SGD(self.PolNet.parameters(), lr)
+        self.optimizer = optim.Adam(self.PolNet.parameters())
 
     # State formation
     def observe(self, map):
