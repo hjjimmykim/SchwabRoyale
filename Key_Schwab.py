@@ -27,7 +27,7 @@ import KS_sim_funcs as Sim
 # # -Simulation Parameters
 max_turn = 2000 # Max number of turns per episode
 #record_turn = int(max_turn/100)  # Record turn every record_turn turns
-n_ep = 10000        # Number of training episodes
+n_ep = 100        # Number of training episodes
 
 # # -Agent Parameters
 alpha = 0.01    # Learning rate
@@ -71,7 +71,6 @@ map_2p = np.array([
 p1, map = Sim.initialize_1p(map_1p, np.array([3,3]), 5*5)
 turn_list = []
 turn_list_smoothed = []
-# map_list = [map_1p]
 
 for i_ep in range(n_ep):	# Loop through games
     # stats
@@ -82,6 +81,8 @@ for i_ep in range(n_ep):	# Loop through games
     # Timekeeping
     t_start = time.time()
     t1 = time.time()
+    
+    map_list = [map]
 
     for turn in range(max_turn):
         turn_reward = -0.1
@@ -105,7 +106,6 @@ for i_ep in range(n_ep):	# Loop through games
             map[p1.loc[0],p1.loc[1]] = -1		# Previous location becomes empty
             map[target_loc[0],target_loc[1]] = p1.id    # Target location becomes occupied
             p1.loc = target_loc				# Update location
-
         elif target_ind == -3:
             p1.has_key = True
             map[target_loc[0],target_loc[1]] = -2    # Remove key
@@ -123,7 +123,8 @@ for i_ep in range(n_ep):	# Loop through games
         if turn == max_turn-1:
             print("Trial did not finish.")
 
-#        np.append(map_list, [map], axis = 0)
+        #np.append(map_list, [map], axis = 0)
+        map_list.append(copy.deepcopy(map))
   
     runtime = time.time()-t_start
     turn_list.append(turn)
@@ -157,3 +158,18 @@ with open(savePath + fileName, 'wb') as f:
 trl = np.arange(n_ep)
 plt.plot(trl, turn_list)
 plt.show()
+
+# # ----Animation----
+ffmpegWriter = manimation.writers['ffmpeg']
+metadata = dict(title = 'Test', artist='Tester', comment='Test')
+writer = ffmpegWriter(fps=15, metadata=metadata)
+
+fig = plt.figure()
+
+with writer.saving(fig, "test.mp4", len(map_list)):
+    for i in range(len(map_list)):
+        plt.clf() # Clear figure
+        plt.imshow(map_list[i], interpolation='none',aspect='equal')
+        writer.grab_frame()
+
+print('Done')
