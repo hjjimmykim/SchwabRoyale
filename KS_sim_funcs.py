@@ -1,6 +1,7 @@
 from Schwab_brain import Agent
 import numpy as np
 import copy
+import torch
 
 
 
@@ -16,9 +17,9 @@ def action_queue():
 
 
 # Initialize map, agents, and team scores
-def initialize_1p(map_in, spawn_loc, in_dim):
-    p1 = Agent(1, spawn_loc, in_dim)  # Create agent object and put it in the dictionary
-    p1.memory.wipe()                                    # Reset memory
+def initialize_1p(map_in, spawn_loc, input_dim):
+    p1 = Agent(1, spawn_loc, input_dim)  # Create agent object and put it in the dictionary
+#    p1.memory.wipe()                                    # Reset memory
     map = copy.deepcopy(map_in)
     map[spawn_loc[0],spawn_loc[1]] = 1                  # Record on the map
     return p1, map
@@ -32,3 +33,9 @@ def reset_1p(player, map_in, spawn_loc):
     map = copy.deepcopy(map_in)
     map[spawn_loc[0],spawn_loc[1]] = 1  # Record on the map
     return map
+
+
+# Policy update function
+def REINFORCE(probability, reward, baseline):
+    rl = -torch.log(probability) * (reward-baseline)
+    return rl
