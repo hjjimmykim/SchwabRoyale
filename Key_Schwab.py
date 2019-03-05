@@ -19,7 +19,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 
 # # --Custom (Schwabbed) Code--
-from Schwab_brain import Agent
+from PGN import Agent
 import KS_sim_funcs as Sim
 
 
@@ -72,6 +72,7 @@ p1, map = Sim.initialize_1p(map_1p, np.array([3,3]), 5*5)
 turn_list = []
 turn_list_smoothed = []
 map_list = [map]
+t_start = time.time()
 
 for i_ep in range(n_ep):	# Loop through games
     # stats
@@ -80,7 +81,6 @@ for i_ep in range(n_ep):	# Loop through games
     act_list = []
 
     # Timekeeping
-    t_start = time.time()
     t1 = time.time()
 
     for turn in range(max_turn):
@@ -125,18 +125,18 @@ for i_ep in range(n_ep):	# Loop through games
 
         # Game ended without conclusion
         if turn == max_turn-1:
-            print("Trial did not finish.")
+            print("Episode did not finish.")
 
         #np.append(map_list, [map], axis = 0)
         if i_ep == n_ep-1:
             map_list.append(copy.deepcopy(map))
   
-    runtime = time.time()-t_start
+    runtime = time.time()-t1
     turn_list.append(turn)
-#    print("Trial", i_ep, "ended on turn", turn, "Runtime:", runtime, "-----------------------")
+#    print("Episode", i_ep, "ended on turn", turn, "Runtime:", runtime)
     if i_ep % 200 == 0 and i_ep!=0:
         #print("Trial", i_ep, "ended on turn", turn)
-        print("Trials", i_ep-200, '-', i_ep-1, "average steps taken:", sum(turn_list[-200:])/200 )
+        print("Episodes", i_ep-200, '-', i_ep-1, "average steps taken:", sum(turn_list[-200:])/200 )
 
     # # Policy update
     loss = 0
@@ -146,7 +146,12 @@ for i_ep in range(n_ep):	# Loop through games
     p1.optimizer.zero_grad()
     loss.backward()
     p1.optimizer.step()
-    p1.baseline = sc * p1.baseline + (1-sc) * p1.reward 
+    p1.baseline = sc * p1.baseline + (1-sc) * p1.reward
+
+
+total_runtime = time.time()-t_start
+benchmark_data = {"Total Runtime":total_runtime, "Episode Runtimes":turn_list}
+print("Total Runtime:", total_runtime)
 
 
 # # ----Save Runtime Data
@@ -156,7 +161,7 @@ pickle_name = save_time + '.pkl'
 with open(savePath + pickle_name, 'wb') as f:
     pickle.dump(turn_list, f)
 
-
+'''
 # # ----Animation----
 ffmpegWriter = manimation.writers['ffmpeg']
 metadata = dict(title = 'Key Schwab', artist='CJ', comment='Visualization')
@@ -177,3 +182,4 @@ print('Done Animating')
 trl = np.arange(n_ep)
 plt.plot(trl, turn_list)
 plt.show()
+'''
