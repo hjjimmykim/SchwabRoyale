@@ -27,7 +27,7 @@ import KS_sim_funcs as Sim
 # # -Simulation Parameters
 max_turn = 2000 # Max number of turns per episode
 #record_turn = int(max_turn/100)  # Record turn every record_turn turns
-n_ep = 10000        # Number of training episodes
+n_ep = 1000        # Number of training episodes
 
 # # -Agent Parameters
 alpha = 0.01    # Learning rate
@@ -67,10 +67,16 @@ map_2p = np.array([
 '''
 
 
+# # --Tracking--
+tracking = True
+record_freq = 100 #Record data every record_freq turns
+tracking_list = []
+tracking_list_smooth = []
+
+
+
 # # --1 Player Simulation--
 p1, map = Sim.initialize_1p(map_1p, np.array([3,3]), 5*5)
-turn_list = []
-turn_list_smoothed = []
 map_list = [map]
 
 for i_ep in range(n_ep):	# Loop through games
@@ -131,12 +137,11 @@ for i_ep in range(n_ep):	# Loop through games
         if i_ep == n_ep-1:
             map_list.append(copy.deepcopy(map))
   
-    runtime = time.time()-t_start
-    turn_list.append(turn)
-#    print("Trial", i_ep, "ended on turn", turn, "Runtime:", runtime, "-----------------------")
-    if i_ep % 200 == 0 and i_ep!=0:
-        #print("Trial", i_ep, "ended on turn", turn)
-        print("Trials", i_ep-200, '-', i_ep-1, "average steps taken:", sum(turn_list[-200:])/200 )
+    tracking_list.append(turn)
+    if tracking and i_ep % record_freq == 0 and i_ep!=0:
+        #runtime = time.time()-t_start
+        #print("Trial", i_ep, "ended on turn", turn, "Runtime:", runtime, "-----------------------")
+        print("Trials", i_ep-record_freq, '-', i_ep-1, "average steps taken:", sum(tracking_list[-record_freq:])/record_freq )
 
     # # Policy update
     loss = 0
@@ -148,13 +153,13 @@ for i_ep in range(n_ep):	# Loop through games
     p1.optimizer.step()
     p1.baseline = sc * p1.baseline + (1-sc) * p1.reward 
 
-
+'''
 # # ----Save Runtime Data
 savePath = 'Save/'
 save_time = datetime.datetime.today().strftime('%Y-%m-%d_%H:%M')
 pickle_name = save_time + '.pkl'
 with open(savePath + pickle_name, 'wb') as f:
-    pickle.dump(turn_list, f)
+    pickle.dump(tracking_list, f)
 
 
 # # ----Animation----
@@ -171,9 +176,15 @@ with writer.saving(fig, anima_name, len(map_list)):
         writer.grab_frame()
 
 print('Done Animating')
-
+'''
 
 # # ----Runtime Plot----
-trl = np.arange(n_ep)
-plt.plot(trl, turn_list)
+track_t = np.arange(n_ep)
+plt.plot(track_t, tracking_list)
+
+for i in range(int(n_ep/record_freq)):
+    tracking_list_smooth.append( sum(tracking_list[ i*record_freq : (i+1)*record_freq ])/record_freq )
+track_t_smooth = record_freq * (np.arange(n_ep/record_freq) + 1)
+plt.plot(track_t_smooth, tracking_list_smooth)
+
 plt.show()

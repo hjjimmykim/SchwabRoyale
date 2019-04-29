@@ -55,9 +55,3 @@ class Agent:
         state[self.loc[0]][self.loc[1]] = 0            # Own location = 0 on map
         state = np.reshape(state, [1,-1]).squeeze()    # Convert to 1D array
         return state
-
-    # Policy Update
-    # This function can go outside the class
-    def REINFORCE(self, probability, reward, baseline):
-        rl = -torch.log(probability) * (reward-baseline)
-        return rl
